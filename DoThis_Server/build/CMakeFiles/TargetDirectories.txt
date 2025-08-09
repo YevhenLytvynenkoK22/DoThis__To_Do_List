@@ -1,0 +1,3 @@
+C:/Users/lytvynenko/Desktop/Client-Server ToDoList DoThis/DoThis_Server/build/CMakeFiles/server.dir
+C:/Users/lytvynenko/Desktop/Client-Server ToDoList DoThis/DoThis_Server/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/lytvynenko/Desktop/Client-Server ToDoList DoThis/DoThis_Server/build/CMakeFiles/ZERO_CHECK.dir
