@@ -1,0 +1,140 @@
+﻿<Window x:Class="DoThis_Client.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DoThis_Client"
+        xmlns:models="clr-namespace:DoThis_Client.Models"
+        xmlns:service="clr-namespace:DoThis_Client.Service"
+        xmlns:viewmodels="clr-namespace:DoThis_Client.ViewModels"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="DoThis" Height="450" Width="800"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="14"
+        FontFamily="Dubai" Background="White" Icon="/Views/to-do-list.ico">
+
+    <Window.Resources>
+        <viewmodels:MainViewModel x:Key="MainViewModelInstance"/>
+
+        <DataTemplate x:Key="TaskTemplate">
+            <materialDesign:Card Margin="5" Padding="5" Cursor="Hand" Background="{DynamicResource MaterialDesignLightBackground}">
+                <materialDesign:Card.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Edit task" Command="{Binding EditTaskCommand}"/>
+                    </ContextMenu>
+                </materialDesign:Card.ContextMenu>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <materialDesign:Badged Grid.Column="0" Margin="0,0,5,0">
+                        <ToggleButton Style="{StaticResource MaterialDesignActionToggleButton}"
+                              IsChecked="{Binding IsCompleted, Mode=TwoWay}"
+                              Command="{Binding ToggleTaskStateCommand}">
+                            <materialDesign:PackIcon Kind="CheckboxBlankCircleOutline"  />
+                        </ToggleButton>
+                    </materialDesign:Badged>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding Title}" 
+                           Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                           TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Description}" 
+                           Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                           TextTrimming="CharacterEllipsis"
+                           Opacity="0.7"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="2"
+                    Style="{StaticResource MaterialDesignIconButton}"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Right"
+                    Command="{Binding DeleteTaskCommand}">
+                        <materialDesign:PackIcon Kind="Close" />
+                    </Button>
+                </Grid>
+            </materialDesign:Card>
+        </DataTemplate>
+
+        <DataTemplate x:Key="AddTaskButtonTemplate">
+            <materialDesign:Card Margin="5" Padding="5" Background="{DynamicResource MaterialDesignLightBackground}"
+                                 Height="100">
+                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                        Command="{Binding DataContext.AddTaskCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" Height="Auto">
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="Plus" Width="30" Height="30" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                    </StackPanel>
+                </Button>
+            </materialDesign:Card>
+        </DataTemplate>
+
+        <service:TaskAndAddButtonTemplateSelector x:Key="TaskTemplateSelector"
+                                                  TaskTemplate="{StaticResource TaskTemplate}"
+                                                  AddTaskButtonTemplate="{StaticResource AddTaskButtonTemplate}"/>
+
+        <DataTemplate x:Key="ColumnTemplate">
+            <materialDesign:Card Margin="10" Padding="10" 
+                                 Background="{DynamicResource MaterialDesignPaper}"
+                                 Width="250"
+                                 AllowDrop="True"
+                                 Drop="Column_Drop"
+                                 DragEnter="Column_DragEnter"
+                                 DragOver="Column_DragOver">
+                <materialDesign:Card.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Rename column" Command="{Binding RenameColumnCommand}"/>
+                    </ContextMenu>
+                </materialDesign:Card.ContextMenu>
+                <DockPanel>
+                    <TextBlock Text="{Binding Name}" 
+                               Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                               DockPanel.Dock="Top"/>
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Tasks}" ItemTemplateSelector="{StaticResource TaskTemplateSelector}"
+                                      PreviewMouseLeftButtonDown="Task_PreviewMouseLeftButtonDown"
+                                      MouseMove="Task_MouseMove"
+                                      AllowDrop="True"
+                                      Drop="Task_Drop"
+                                      DragEnter="Task_DragEnter"
+                                      DragOver="Task_DragOver">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </materialDesign:Card>
+        </DataTemplate>
+
+        <DataTemplate x:Key="AddColumnTemplate">
+            <materialDesign:Card Margin="10" Padding="10" Width="250" Background="{DynamicResource MaterialDesignLightBackground}">
+                <Button Command="{Binding Source={StaticResource MainViewModelInstance}, Path=AddColumnCommand}"
+                        Style="{StaticResource MaterialDesignFlatButton}" Height="Auto">
+                    <materialDesign:PackIcon Kind="Plus" Width="40" Height="Auto" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                </Button>
+            </materialDesign:Card>
+        </DataTemplate>
+
+        <service:ColumnAndAddColumnTemplateSelector x:Key="ColumnTemplateSelector"
+                                                    ColumnTemplate="{StaticResource ColumnTemplate}"
+                                                    AddColumnTemplate="{StaticResource AddColumnTemplate}"/>
+    </Window.Resources>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding Columns}" ItemTemplateSelector="{StaticResource ColumnTemplateSelector}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+    </ScrollViewer>
+</Window>
